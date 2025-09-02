@@ -3,9 +3,7 @@ name: Release Binaries on Tag
 on:
   push:
     tags:
-      - '*'
-    branches:
-      - main
+      - 'v*'
 
 permissions:
   contents: write
@@ -38,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-binaries
-          path: dist/**
+          path: dist/
 
   release:
     needs: build
@@ -49,21 +47,13 @@ jobs:
         with:
           path: ./artifacts
 
-      - name: Create GitHub Release
+      - name: Create and Upload Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload binaries to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          files: ./artifacts/**
+          files: ./artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
