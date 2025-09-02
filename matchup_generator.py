@@ -11,6 +11,7 @@ import shutil
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import re
+import unicodedata
 
 # Installation des dépendances pour PDF/PNG si nécessaire
 try:
@@ -23,6 +24,12 @@ try:
 except ImportError:
     PANDAS_INSTALLED = False
     print("Les bibliothèques 'pandas', 'reportlab' et 'matplotlib' ne sont pas installées. Les exports PDF et PNG seront désactivés.")
+
+
+def remove_accents(input_str: str) -> str:
+    """Removes accents from a string and converts it to lowercase and removes combining characters."""
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
 class MatchupGenerator:
@@ -126,11 +133,22 @@ def ensure_dir(path: str):
 
 
 def save_markdown_table(filename, headers, rows):
+    """Saves a list of rows to a markdown table, with improved formatting."""
     with open(filename, 'w', encoding='utf-8') as f:
-        f.write('| ' + ' | '.join(headers) + ' |\n')
-        f.write('| ' + ' | '.join(['---'] * len(headers)) + ' |\n')
+        # Generate the header row
+        header_line = '| ' + ' | '.join(headers) + ' |'
+        f.write(header_line + '\n')
+        
+        # Generate the separator line with centered alignment
+        alignment_line = '|'
+        for _ in headers:
+            alignment_line += ' :---: |'
+        f.write(alignment_line + '\n')
+        
+        # Generate the data rows
         for row in rows:
-            f.write('| ' + ' | '.join(str(cell) for cell in row) + ' |\n')
+            row_content = '| ' + ' | '.join(str(cell) for cell in row) + ' |'
+            f.write(row_content + '\n')
 
 
 def csv_to_pdf(csv_path, pdf_path):
@@ -214,8 +232,9 @@ def generate_per_day_and_per_coach_tables(enriched_csv: str, outdir: str):
     for day in days:
         rows = [row for row in reader if row[journee_key] == day]
         headers = list(reader[0].keys())
+        sanitized_day = remove_accents(day).replace(' ', '_')
         md_path = os.path.join(
-            per_day_dir, f"matchups_{day.replace(' ', '_')}.md")
+            per_day_dir, f"matchups_{sanitized_day}.md")
         save_markdown_table(md_path, headers, [
                             [r[h] for h in headers] for r in rows])
 
@@ -228,6 +247,9 @@ def generate_per_day_and_per_coach_tables(enriched_csv: str, outdir: str):
 
         pdf_path = os.path.splitext(md_path)[0] + ".pdf"
         csv_to_pdf(csv_path, pdf_path)
+        
+        img_path = os.path.splitext(md_path)[0] + ".png"
+        csv_to_image(csv_path, img_path)
 
     coachs = sorted(set(row[local_coach_key] for row in reader) | set(
         row[visiteur_coach_key] for row in reader))
@@ -235,8 +257,9 @@ def generate_per_day_and_per_coach_tables(enriched_csv: str, outdir: str):
         rows = [r for r in reader if r[local_coach_key]
                 == coach or r[visiteur_coach_key] == coach]
         headers = list(reader[0].keys())
+        sanitized_coach = remove_accents(coach).replace(' ', '_')
         md_path = os.path.join(
-            per_coach_dir, f"matchups_{coach.replace(' ', '_')}.md")
+            per_coach_dir, f"matchups_{sanitized_coach}.md")
         save_markdown_table(md_path, headers, [
                             [r[h] for h in headers] for r in rows])
 
