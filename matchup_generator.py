@@ -35,13 +35,13 @@ def remove_accents(input_str: str) -> str:
 class MatchupGenerator:
     """
     Générateur de plannings de matchs.
-    Utilise l'algorithme de tournoi à la ronde pour une génération déterministe.
+    Utilise une méthode de randomisation simple et efficace.
     """
 
     def __init__(self, n_teams: int, n_days: int):
         if n_teams % 2 != 0:
             raise ValueError(
-                "Le nombre d'équipes doit être pair pour générer un tournoi à la ronde.")
+                "Le nombre d'équipes doit être pair.")
         self.n_teams = n_teams
         self.n_days = n_days
         self.teams = list(range(1, n_teams + 1))
@@ -49,34 +49,26 @@ class MatchupGenerator:
 
     def generate(self) -> bool:
         """
-        Génère un planning de matchs en utilisant l'algorithme de tournoi à la ronde.
-        L'ordre des matchs par journée est mélangé aléatoirement.
+        Génère un planning de matchs en utilisant une méthode de randomisation.
+        Pour chaque journée, l'ensemble des équipes est mélangé, puis les équipes sont appariées
+        séquentiellement pour former les rencontres.
         """
-        teams_mod = self.teams[:]
-        schedule_full = []
-        n = len(teams_mod)
-        mid = n // 2
-
-        p1 = teams_mod[0]
-        p_rest = teams_mod[1:]
-
-        for i in range(self.n_days):
+        teams_copy = list(self.teams)
+        self.schedule = {}
+        
+        for i in range(1, self.n_days + 1):
             day_matches = []
-
-            day_matches.append((p1, p_rest[-1]))
-
-            for j in range(mid - 1):
-                day_matches.append((p_rest[j], p_rest[-(j + 2)]))
-
-            # Mélange aléatoirement les paires de matchs de la journée
-            random.shuffle(day_matches)
-
-            schedule_full.append(day_matches)
-
-            p_rest = [p_rest[-1]] + p_rest[:-1]
-
-        self.schedule = {f"Journée {i+1}": schedule_full[i]
-                         for i in range(min(self.n_days, len(schedule_full)))}
+            # Mélange aléatoire des équipes pour chaque journée
+            random.shuffle(teams_copy)
+            
+            # Appariement séquentiel pour créer les matchs
+            for j in range(0, self.n_teams, 2):
+                team1 = teams_copy[j]
+                team2 = teams_copy[j+1]
+                day_matches.append((team1, team2))
+                
+            self.schedule[f"Journée {i}"] = day_matches
+            
         return True
 
     def save_csv(self, filename: str):
@@ -218,8 +210,6 @@ def generate_per_day_and_per_coach_tables(enriched_csv: str, outdir: str):
         print("Fichier enrichi vide, impossible de générer les tables.")
         return
 
-    days = sorted(set(row['Journée'] for row in reader))
-
     headers_map = {h.lower(): h for h in reader[0].keys()}
     journee_key = headers_map.get('journée')
     local_coach_key = headers_map.get('coach local')
@@ -228,6 +218,8 @@ def generate_per_day_and_per_coach_tables(enriched_csv: str, outdir: str):
     if not all([journee_key, local_coach_key, visiteur_coach_key]):
         print("Colonnes requises (Journée, Coach Local, Coach Visiteur) introuvables.")
         return
+
+    days = sorted(set(row[journee_key] for row in reader), key=lambda x: int(re.search(r'\d+', x).group()) if re.search(r'\d+', x) else 0)
 
     for day in days:
         rows = [row for row in reader if row[journee_key] == day]

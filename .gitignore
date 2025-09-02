@@ -76,5 +76,5 @@ dmypy.json
 cython_debug/
 
 # Generated files
-*Generated*
+*generated*
 demo/

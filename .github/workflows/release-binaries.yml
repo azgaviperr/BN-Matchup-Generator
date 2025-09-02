@@ -32,6 +32,34 @@ jobs:
         run: |
           python build.py
 
+      - name: Rename binary
+        shell: bash
+        run: |
+          os_name="${{ runner.os }}"
+          prefix=""
+          ext=""
+          if [[ "$os_name" == "Linux" ]]; then
+            prefix="Linux-"
+            ext=""
+          elif [[ "$os_name" == "Windows" ]]; then
+            prefix="Windows-"
+            ext=".exe"
+          elif [[ "$os_name" == "macOS" ]]; then
+            prefix="macOS-"
+            ext=""
+          fi
+
+          # Find the executable file inside the dist folder and rename it
+          # Assumes the executable is the only file in 'dist/' or a subfolder.
+          # Example: 'dist/app' on Linux/macOS or 'dist/app.exe' on Windows
+          for file in dist/*; do
+            if [[ -f "$file" ]]; then
+              filename=$(basename "$file")
+              dirname=$(dirname "$file")
+              mv "$file" "$dirname/${prefix}${filename}"
+            fi
+          done
+
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
