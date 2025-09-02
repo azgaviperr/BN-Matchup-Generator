@@ -2,7 +2,7 @@
 # V3 - Générateur de plannings de matchs
 
 import random
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Set
 import csv
 import os
 import json
@@ -35,7 +35,7 @@ def remove_accents(input_str: str) -> str:
 class MatchupGenerator:
     """
     Générateur de plannings de matchs.
-    Utilise une méthode de randomisation simple et efficace.
+    Garantit que chaque paire de coachs ne se rencontre qu'une seule fois.
     """
 
     def __init__(self, n_teams: int, n_days: int):
@@ -46,29 +46,51 @@ class MatchupGenerator:
         self.n_days = n_days
         self.teams = list(range(1, n_teams + 1))
         self.schedule: Dict[str, List[Tuple[int, int]]] = {}
+        self.all_possible_matches: List[Tuple[int, int]] = []
+        for i in range(1, n_teams + 1):
+            for j in range(i + 1, n_teams + 1):
+                self.all_possible_matches.append(tuple(sorted((i, j))))
 
     def generate(self) -> bool:
         """
-        Génère un planning de matchs en utilisant une méthode de randomisation.
-        Pour chaque journée, l'ensemble des équipes est mélangé, puis les équipes sont appariées
-        séquentiellement pour former les rencontres.
+        Génère un planning de matchs en s'assurant qu'aucune rencontre n'est répétée.
+        Le processus tire au sort les rencontres jour après jour, en retirant les paires utilisées.
         """
-        teams_copy = list(self.teams)
+        matches_to_schedule = list(self.all_possible_matches)
+        random.shuffle(matches_to_schedule)
+        
+        scheduled_teams: Set[int] = set()
         self.schedule = {}
         
         for i in range(1, self.n_days + 1):
             day_matches = []
-            # Mélange aléatoire des équipes pour chaque journée
-            random.shuffle(teams_copy)
+            teams_for_day: Set[int] = set()
             
-            # Appariement séquentiel pour créer les matchs
-            for j in range(0, self.n_teams, 2):
-                team1 = teams_copy[j]
-                team2 = teams_copy[j+1]
-                day_matches.append((team1, team2))
-                
+            remaining_matches = [m for m in matches_to_schedule if m[0] not in teams_for_day and m[1] not in teams_for_day]
+            random.shuffle(remaining_matches)
+            
+            # Simple greedy algorithm to find matchups for the day
+            for match in remaining_matches:
+                if match[0] not in teams_for_day and match[1] not in teams_for_day:
+                    day_matches.append(match)
+                    teams_for_day.add(match[0])
+                    teams_for_day.add(match[1])
+
+            # Check if all teams have been scheduled for the day
+            # This is a basic check. For perfect schedules, a more complex algorithm might be needed.
+            if len(day_matches) * 2 != self.n_teams:
+                # If we cannot schedule all teams for the day, something is wrong with the algorithm or remaining matches.
+                # A more robust algorithm would backtrack. We'll simply stop for now.
+                print(f"Avertissement : Impossible de planifier une journée complète pour la journée {i}. Fin du processus.")
+                self.n_days = i - 1
+                return False
+
             self.schedule[f"Journée {i}"] = day_matches
             
+            # Remove used matches from the pool
+            for match in day_matches:
+                matches_to_schedule.remove(match)
+        
         return True
 
     def save_csv(self, filename: str):
@@ -106,14 +128,18 @@ def save_enriched_matchups_csv(filename: str, schedule: Dict, coachs_map: Dict[s
         ])
         for day, matches in schedule.items():
             for match in matches:
-                local_data = coachs_map.get(str(match[0]), {})
-                visiteur_data = coachs_map.get(str(match[1]), {})
+                # Assign a consistent home and away team based on their number (e.g., lower number is always home)
+                team1_id, team2_id = sorted(match)
+                
+                local_data = coachs_map.get(str(team1_id), {})
+                visiteur_data = coachs_map.get(str(team2_id), {})
+                
                 writer.writerow([
                     day,
-                    local_data.get("coach", match[0]),
+                    local_data.get("coach", team1_id),
                     local_data.get("team", ""),
                     local_data.get("roster", ""),
-                    visiteur_data.get("coach", match[1]),
+                    visiteur_data.get("coach", team2_id),
                     visiteur_data.get("team", ""),
                     visiteur_data.get("roster", "")
                 ])
@@ -127,17 +153,12 @@ def ensure_dir(path: str):
 def save_markdown_table(filename, headers, rows):
     """Saves a list of rows to a markdown table, with improved formatting."""
     with open(filename, 'w', encoding='utf-8') as f:
-        # Generate the header row
         header_line = '| ' + ' | '.join(headers) + ' |'
         f.write(header_line + '\n')
-        
-        # Generate the separator line with centered alignment
         alignment_line = '|'
         for _ in headers:
             alignment_line += ' :---: |'
         f.write(alignment_line + '\n')
-        
-        # Generate the data rows
         for row in rows:
             row_content = '| ' + ' | '.join(str(cell) for cell in row) + ' |'
             f.write(row_content + '\n')
@@ -641,6 +662,15 @@ def main_ui():
                 spinner_label.pack_forget()
                 messagebox.showerror(
                     "Erreur", "Le nombre de journées doit être supérieur à zéro.")
+                return
+
+            # Vérification du nombre maximal de journées possibles
+            max_days = n_teams - 1
+            if n_days > max_days:
+                spinner_running[0] = False
+                spinner_label.pack_forget()
+                messagebox.showerror(
+                    "Erreur", f"Le nombre de journées ne peut pas dépasser {max_days} pour {n_teams} équipes.")
                 return
 
             coachs_data = load_coachs_from_csv(coachs_file_var.get())
