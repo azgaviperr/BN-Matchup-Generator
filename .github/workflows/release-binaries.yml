@@ -64,6 +64,6 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          files: ./artifacts/**/*.exe,./artifacts/**/*.app,./artifacts/**/*.bin,./artifacts/**/*.sh,./artifacts/**/*.py,./artifacts/**/*.zip,./artifacts/**/*.tar.gz,./artifacts/**/*.dmg,./artifacts/**/*.pkg,./artifacts/**/*.deb,./artifacts/**/*.rpm,./artifacts/**/*.run,./artifacts/**/*.AppImage
+          files: ./artifacts/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
