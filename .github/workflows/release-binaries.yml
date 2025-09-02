@@ -59,13 +59,16 @@ jobs:
             fi
           done
 
-      - name: Zip binaries
+      - name: Zip binaries (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          if [ "${{ runner.os }}" == "Windows" ]; then
-            powershell Compress-Archive -Path dist/* -DestinationPath ${{ runner.os }}-binaries.zip
-          else
-            zip -r ${{ runner.os }}-binaries.zip dist/
-          fi
+          Compress-Archive -Path dist/* -DestinationPath ${{ runner.os }}-binaries.zip
+      
+      - name: Zip binaries (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          zip -r ${{ runner.os }}-binaries.zip dist/
       
       - name: Upload zipped binaries
         uses: actions/upload-artifact@v4
