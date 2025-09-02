@@ -31,17 +31,11 @@ jobs:
         run: |
           python build.py
 
-      - name: Prepare binaries for release
-        run: |
-          mkdir -p release
-          cp dist/** release/ 2>nul || :
-        shell: bash
-
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-binaries
-          path: release/**
+          path: dist/**
 
   release:
     needs: build
