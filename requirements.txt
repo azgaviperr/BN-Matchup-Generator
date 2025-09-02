@@ -1,0 +1,8 @@
+pandas
+reportlab
+matplotlib
+requests
+beautifulsoup4
+requests-html
+PyInstaller
+tk
