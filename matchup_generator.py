@@ -59,35 +59,40 @@ class MatchupGenerator:
         matches_to_schedule = list(self.all_possible_matches)
         random.shuffle(matches_to_schedule)
         
-        scheduled_teams: Set[int] = set()
         self.schedule = {}
         
         for i in range(1, self.n_days + 1):
             day_matches = []
-            teams_for_day: Set[int] = set()
             
-            remaining_matches = [m for m in matches_to_schedule if m[0] not in teams_for_day and m[1] not in teams_for_day]
-            random.shuffle(remaining_matches)
+            # Ajout d'une boucle de tentatives pour chaque jour
+            for attempt in range(1001):  # 1001 tentatives max
+                teams_for_day: Set[int] = set()
+                current_day_matches = []
+                
+                # Mélange des matchs restants pour une nouvelle tentative
+                random.shuffle(matches_to_schedule)
+                
+                # Algorithme simple pour trouver des matchs pour la journée
+                for match in matches_to_schedule:
+                    if match[0] not in teams_for_day and match[1] not in teams_for_day:
+                        current_day_matches.append(match)
+                        teams_for_day.add(match[0])
+                        teams_for_day.add(match[1])
+                
+                # Vérifie si tous les coachs ont une rencontre
+                if len(current_day_matches) * 2 == self.n_teams:
+                    day_matches = current_day_matches
+                    break  # Sort de la boucle des tentatives car une solution a été trouvée
             
-            # Simple greedy algorithm to find matchups for the day
-            for match in remaining_matches:
-                if match[0] not in teams_for_day and match[1] not in teams_for_day:
-                    day_matches.append(match)
-                    teams_for_day.add(match[0])
-                    teams_for_day.add(match[1])
-
-            # Check if all teams have been scheduled for the day
-            # This is a basic check. For perfect schedules, a more complex algorithm might be needed.
-            if len(day_matches) * 2 != self.n_teams:
-                # If we cannot schedule all teams for the day, something is wrong with the algorithm or remaining matches.
-                # A more robust algorithm would backtrack. We'll simply stop for now.
-                print(f"Avertissement : Impossible de planifier une journée complète pour la journée {i}. Fin du processus.")
+            # Si aucune solution n'a été trouvée après 1001 tentatives
+            if not day_matches:
+                print(f"Échec : Impossible de planifier une journée complète pour la journée {i} après 1001 tentatives. Fin du processus.")
                 self.n_days = i - 1
                 return False
 
             self.schedule[f"Journée {i}"] = day_matches
             
-            # Remove used matches from the pool
+            # Retire les matchs utilisés du pool de matchs restants
             for match in day_matches:
                 matches_to_schedule.remove(match)
         
@@ -458,7 +463,7 @@ def main_ui():
             local_coach = match_data.get(coach_local_key, "N/A")
             visiteur_coach = match_data.get(visiteur_coach_key, "N/A")
             local_team = match_data.get(team_local_key, "")
-            visiteur_team = match_data.get(visiteur_team_key, "")
+            visiteur_team = match_data.get(team_visiteur_key, "")
             local_roster = match_data.get(roster_local_key, "")
             visiteur_roster = match_data.get(roster_visiteur_key, "")
 
@@ -685,7 +690,12 @@ def main_ui():
             coachs_map = {str(row["num"]): row for row in coachs_data}
 
             gen = MatchupGenerator(n_teams, n_days)
-            gen.generate()
+            if not gen.generate():
+                spinner_running[0] = False
+                spinner_label.pack_forget()
+                messagebox.showerror(
+                    "Erreur", "La génération du calendrier a échoué. Veuillez vérifier les paramètres.")
+                return
 
             date_str = datetime.now().strftime("%Y%m%d_%H%M%S")
             outdir = f"generated_{date_str}"

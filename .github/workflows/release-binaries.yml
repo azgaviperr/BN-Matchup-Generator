@@ -51,7 +51,6 @@ jobs:
 
           # Find the executable file inside the dist folder and rename it
           # Assumes the executable is the only file in 'dist/' or a subfolder.
-          # Example: 'dist/app' on Linux/macOS or 'dist/app.exe' on Windows
           for file in dist/*; do
             if [[ -f "$file" ]]; then
               filename=$(basename "$file")
@@ -60,11 +59,19 @@ jobs:
             fi
           done
 
-      - name: Upload binaries
+      - name: Zip binaries
+        run: |
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            powershell Compress-Archive -Path dist/* -DestinationPath ${{ runner.os }}-binaries.zip
+          else
+            zip -r ${{ runner.os }}-binaries.zip dist/
+          fi
+      
+      - name: Upload zipped binaries
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-binaries
-          path: dist/
+          path: ${{ runner.os }}-binaries.zip
 
   release:
     needs: build
