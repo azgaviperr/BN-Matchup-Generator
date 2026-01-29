@@ -2,6 +2,33 @@
 
 Ce projet est une solution complète pour les ligues Blood Bowl qui utilisent Tourplay. Il vous permet d'extraire les participants, de générer un calendrier de matchs équilibré, et même de projeter une présentation animée des rencontres pour vos événements de ligue.
 
+## 🆕 Version 2 Disponible !
+
+**Une réécriture complète avec architecture moderne et améliorée !**
+
+La Version 2 apporte:
+- ✅ **Architecture modulaire** - Code mieux organisé et maintenable
+- ✅ **Algorithme round-robin** - Génération optimale garantie
+- ✅ **Mode CLI** - Utilisation en ligne de commande
+- ✅ **Tests intégrés** - Suite de tests automatisés
+- ✅ **Exports multiples** - CSV, JSON, Markdown, PDF
+- ✅ **Meilleure gestion d'erreurs** - Messages clairs et logging
+
+**→ [Documentation complète V2](README_V2.md)**
+
+**Démarrage rapide V2:**
+```bash
+# Mode graphique
+python matchup_generator_v2.py
+
+# Mode ligne de commande
+python matchup_generator_v2.py --coaches coachs_extract.csv --days 11
+```
+
+---
+
+## Documentation Version 1 (Legacy)
+
 ## 1\. Démarrer
 
 ### Étape 1 : Téléchargement des données des participants 📥

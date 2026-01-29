@@ -78,3 +78,11 @@ cython_debug/
 # Generated files
 *generated*
 demo/
+
+# V2 specific
+dist_v2/
+build_v2/
+*.spec
+
+# Test outputs
+tourplay_data_exported/

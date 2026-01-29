@@ -1,0 +1,188 @@
+{
+  "export_date": "2026-01-29T23:44:58.512158",
+  "schedule": [
+    {
+      "day": "Journée 1",
+      "matches": [
+        {
+          "local": {
+            "team_id": 1,
+            "coach": "Alice",
+            "team": "Eagles",
+            "roster": "Humans"
+          },
+          "visitor": {
+            "team_id": 2,
+            "coach": "Bob",
+            "team": "Crushers",
+            "roster": "Orcs"
+          }
+        },
+        {
+          "local": {
+            "team_id": 3,
+            "coach": "Charlie",
+            "team": "Shadows",
+            "roster": "Dark Elves"
+          },
+          "visitor": {
+            "team_id": 8,
+            "coach": "Henry",
+            "team": "Bears",
+            "roster": "Norse"
+          }
+        },
+        {
+          "local": {
+            "team_id": 4,
+            "coach": "Diana",
+            "team": "Thunders",
+            "roster": "Dwarves"
+          },
+          "visitor": {
+            "team_id": 7,
+            "coach": "Grace",
+            "team": "Hawks",
+            "roster": "High Elves"
+          }
+        },
+        {
+          "local": {
+            "team_id": 5,
+            "coach": "Eve",
+            "team": "Dragons",
+            "roster": "Lizardmen"
+          },
+          "visitor": {
+            "team_id": 6,
+            "coach": "Frank",
+            "team": "Wolves",
+            "roster": "Chaos"
+          }
+        }
+      ]
+    },
+    {
+      "day": "Journée 2",
+      "matches": [
+        {
+          "local": {
+            "team_id": 1,
+            "coach": "Alice",
+            "team": "Eagles",
+            "roster": "Humans"
+          },
+          "visitor": {
+            "team_id": 8,
+            "coach": "Henry",
+            "team": "Bears",
+            "roster": "Norse"
+          }
+        },
+        {
+          "local": {
+            "team_id": 2,
+            "coach": "Bob",
+            "team": "Crushers",
+            "roster": "Orcs"
+          },
+          "visitor": {
+            "team_id": 7,
+            "coach": "Grace",
+            "team": "Hawks",
+            "roster": "High Elves"
+          }
+        },
+        {
+          "local": {
+            "team_id": 3,
+            "coach": "Charlie",
+            "team": "Shadows",
+            "roster": "Dark Elves"
+          },
+          "visitor": {
+            "team_id": 6,
+            "coach": "Frank",
+            "team": "Wolves",
+            "roster": "Chaos"
+          }
+        },
+        {
+          "local": {
+            "team_id": 4,
+            "coach": "Diana",
+            "team": "Thunders",
+            "roster": "Dwarves"
+          },
+          "visitor": {
+            "team_id": 5,
+            "coach": "Eve",
+            "team": "Dragons",
+            "roster": "Lizardmen"
+          }
+        }
+      ]
+    },
+    {
+      "day": "Journée 3",
+      "matches": [
+        {
+          "local": {
+            "team_id": 1,
+            "coach": "Alice",
+            "team": "Eagles",
+            "roster": "Humans"
+          },
+          "visitor": {
+            "team_id": 7,
+            "coach": "Grace",
+            "team": "Hawks",
+            "roster": "High Elves"
+          }
+        },
+        {
+          "local": {
+            "team_id": 6,
+            "coach": "Frank",
+            "team": "Wolves",
+            "roster": "Chaos"
+          },
+          "visitor": {
+            "team_id": 8,
+            "coach": "Henry",
+            "team": "Bears",
+            "roster": "Norse"
+          }
+        },
+        {
+          "local": {
+            "team_id": 2,
+            "coach": "Bob",
+            "team": "Crushers",
+            "roster": "Orcs"
+          },
+          "visitor": {
+            "team_id": 5,
+            "coach": "Eve",
+            "team": "Dragons",
+            "roster": "Lizardmen"
+          }
+        },
+        {
+          "local": {
+            "team_id": 3,
+            "coach": "Charlie",
+            "team": "Shadows",
+            "roster": "Dark Elves"
+          },
+          "visitor": {
+            "team_id": 4,
+            "coach": "Diana",
+            "team": "Thunders",
+            "roster": "Dwarves"
+          }
+        }
+      ]
+    }
+  ]
+}
