@@ -88,6 +88,9 @@ class MatchupGenerator:
         """
         teams = self.teams.copy()
         
+        # Shuffle teams for variety (controlled by seed if set)
+        random.shuffle(teams)
+        
         # For the circle method, we fix one team and rotate others
         fixed_team = teams[0]
         rotating_teams = teams[1:]
