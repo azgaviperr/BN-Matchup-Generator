@@ -13,14 +13,13 @@ logger = logging.getLogger(__name__)
 
 # Check for optional dependencies
 try:
-    import pandas as pd
     from reportlab.lib.pagesizes import A4
     from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
     from reportlab.lib import colors
     REPORTLAB_AVAILABLE = True
 except ImportError:
     REPORTLAB_AVAILABLE = False
-    logger.warning("reportlab/pandas not available - PDF export disabled")
+    logger.warning("reportlab not available - PDF export disabled")
 
 
 class MatchupExporter:

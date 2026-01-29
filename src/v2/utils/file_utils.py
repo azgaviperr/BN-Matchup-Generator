@@ -4,6 +4,7 @@ Utility functions for file operations and text processing.
 """
 
 import os
+import re
 import unicodedata
 from typing import Optional
 import logging
@@ -65,16 +66,20 @@ def ensure_dir(path: str) -> str:
     return path
 
 
-def get_unique_filename(base_path: str, extension: str = "") -> str:
+def get_unique_filename(base_path: str, extension: str = "", max_tries: int = 9999) -> str:
     """
     Get a unique filename by appending a number if file exists.
     
     Args:
         base_path: Base file path without extension
         extension: File extension (with or without dot)
+        max_tries: Maximum number of attempts before raising an error
         
     Returns:
         Unique filename
+        
+    Raises:
+        RuntimeError: If max_tries is exceeded
     """
     if not extension.startswith('.') and extension:
         extension = f'.{extension}'
@@ -84,12 +89,12 @@ def get_unique_filename(base_path: str, extension: str = "") -> str:
     if not os.path.exists(path):
         return path
     
-    counter = 1
-    while True:
+    for counter in range(1, max_tries + 1):
         path = f"{base_path}_{counter}{extension}"
         if not os.path.exists(path):
             return path
-        counter += 1
+    
+    raise RuntimeError(f"Could not find unique filename after {max_tries} attempts")
 
 
 def format_match_string(team1: str, team2: str, separator: str = "vs") -> str:
@@ -117,6 +122,5 @@ def parse_day_number(day_string: str) -> Optional[int]:
     Returns:
         Day number or None if not found
     """
-    import re
     match = re.search(r'\d+', day_string)
     return int(match.group()) if match else None

@@ -19,6 +19,7 @@ def build_executable():
     current_os = platform.system().lower()
     
     print(f"== Building BN Matchup Generator V2 for {current_os} ==")
+    print("Note: Windows build will be GUI-only (use Python directly for CLI mode)")
     
     # Create dist directory
     os.makedirs(DIST_DIR, exist_ok=True)

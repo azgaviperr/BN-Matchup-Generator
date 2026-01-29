@@ -7,6 +7,9 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass, field, asdict
 import json
 import csv
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -83,7 +86,7 @@ class CoachManager:
                 sniffer = csv.Sniffer()
                 try:
                     delimiter = sniffer.sniff(sample, delimiters=[',', ';', '\t']).delimiter
-                except:
+                except csv.Error:
                     delimiter = ','  # fallback
         
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -92,8 +95,8 @@ class CoachManager:
                 try:
                     coach = Coach.from_dict(row)
                     self.coaches.append(coach)
-                except Exception as e:
-                    print(f"Warning: Could not parse row {row}: {e}")
+                except (ValueError, KeyError, TypeError) as e:
+                    logger.warning(f"Could not parse row {row}: {e}")
         
         return len(self.coaches)
     
@@ -138,8 +141,8 @@ class CoachManager:
             try:
                 coach = Coach.from_dict(item)
                 self.coaches.append(coach)
-            except Exception as e:
-                print(f"Warning: Could not parse item {item}: {e}")
+            except (ValueError, KeyError, TypeError) as e:
+                logger.warning(f"Could not parse item {item}: {e}")
         
         return len(self.coaches)
     

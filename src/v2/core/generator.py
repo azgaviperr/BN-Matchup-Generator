@@ -105,8 +105,7 @@ class MatchupGenerator:
             
             # Match the remaining teams in pairs
             for i in range(1, len(rotating_teams) // 2 + 1):
-                if i < len(rotating_teams) - i + 1:
-                    day_matches.append((rotating_teams[i], rotating_teams[-i]))
+                day_matches.append((rotating_teams[i], rotating_teams[-i]))
             
             self.schedule[f"Journée {day}"] = day_matches
             
