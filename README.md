@@ -52,7 +52,7 @@ python matchup_generator.py
 Une interface graphique va s'ouvrir, vous offrant plusieurs options :
 
 * **Choix du nombre de journées** : Définissez combien de journées vous souhaitez générer.
-* **Génération en un clic** : Le script utilise un algorithme de tournoi à la ronde pour créer un calendrier équilibré.
+* **Génération en un clic** : Le script tire au sort les rencontres journée par journée (pas de tournoi à la ronde figé), en garantissant que deux coachs ne s'affrontent qu'une seule fois dans la saison.
 * **Export des résultats** : Après la génération, un dossier sera créé contenant :
   * Un fichier CSV avec tous les matchs enrichis des informations (coach, équipe, roster).
   * Des fichiers Markdown, CSV et PDF par journée, et des PNG/Markdown par coach pour un partage facile.

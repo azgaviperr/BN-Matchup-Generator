@@ -51,52 +51,82 @@ class MatchupGenerator:
             for j in range(i + 1, n_teams + 1):
                 self.all_possible_matches.append(tuple(sorted((i, j))))
 
-    def generate(self) -> bool:
+    def _find_day_matching(self, available: Set[Tuple[int, int]]) -> List[Tuple[int, int]]:
+        """
+        Cherche aléatoirement un appariement complet de la journée : chaque coach
+        joue exactement une fois, uniquement contre un adversaire non encore rencontré.
+        Retourne la liste des rencontres, ou une liste vide si aucune n'existe.
+        """
+        neighbours: Dict[int, Set[int]] = {team: set() for team in self.teams}
+        for a, b in available:
+            neighbours[a].add(b)
+            neighbours[b].add(a)
+
+        day_matches: List[Tuple[int, int]] = []
+        unmatched = set(self.teams)
+
+        def backtrack() -> bool:
+            if not unmatched:
+                return True
+            # Heuristique : traiter d'abord le coach ayant le moins d'adversaires possibles
+            team = min(unmatched, key=lambda t: len(neighbours[t] & unmatched))
+            candidates = list(neighbours[team] & unmatched)
+            random.shuffle(candidates)
+            unmatched.discard(team)
+            for opponent in candidates:
+                unmatched.discard(opponent)
+                day_matches.append(tuple(sorted((team, opponent))))
+                if backtrack():
+                    return True
+                day_matches.pop()
+                unmatched.add(opponent)
+            unmatched.add(team)
+            return False
+
+        if backtrack():
+            return day_matches
+        return []
+
+    def generate(self, max_attempts: int = 100) -> bool:
         """
         Génère un planning de matchs en s'assurant qu'aucune rencontre n'est répétée.
-        Le processus tire au sort les rencontres jour après jour, en retirant les paires utilisées.
+        Chaque journée est tirée au sort indépendamment (pas de round-robin fixe),
+        parmi les rencontres encore disponibles.
         """
-        matches_to_schedule = list(self.all_possible_matches)
-        random.shuffle(matches_to_schedule)
-        
-        self.schedule = {}
-        
-        for i in range(1, self.n_days + 1):
-            day_matches = []
-            
-            # Ajout d'une boucle de tentatives pour chaque jour
-            for attempt in range(1001):  # 1001 tentatives max
-                teams_for_day: Set[int] = set()
-                current_day_matches = []
-                
-                # Mélange des matchs restants pour une nouvelle tentative
-                random.shuffle(matches_to_schedule)
-                
-                # Algorithme simple pour trouver des matchs pour la journée
-                for match in matches_to_schedule:
-                    if match[0] not in teams_for_day and match[1] not in teams_for_day:
-                        current_day_matches.append(match)
-                        teams_for_day.add(match[0])
-                        teams_for_day.add(match[1])
-                
-                # Vérifie si tous les coachs ont une rencontre
-                if len(current_day_matches) * 2 == self.n_teams:
-                    day_matches = current_day_matches
-                    break  # Sort de la boucle des tentatives car une solution a été trouvée
-            
-            # Si aucune solution n'a été trouvée après 1001 tentatives
-            if not day_matches:
-                print(f"Échec : Impossible de planifier une journée complète pour la journée {i} après 1001 tentatives. Fin du processus.")
-                self.n_days = i - 1
-                return False
+        if self.n_days > self.n_teams - 1:
+            print(
+                f"Échec : {self.n_days} journées demandées alors que chaque coach ne peut "
+                f"affronter que {self.n_teams - 1} adversaires différents.")
+            self.schedule = {}
+            return False
 
-            self.schedule[f"Journée {i}"] = day_matches
-            
-            # Retire les matchs utilisés du pool de matchs restants
-            for match in day_matches:
-                matches_to_schedule.remove(match)
-        
-        return True
+        for _ in range(max_attempts):
+            available = set(self.all_possible_matches)
+            schedule: Dict[str, List[Tuple[int, int]]] = {}
+            complete = True
+
+            for i in range(1, self.n_days + 1):
+                day_matches = self._find_day_matching(available)
+                if not day_matches:
+                    # Un choix précédent mène à une impasse : on recommence le tirage
+                    complete = False
+                    break
+                random.shuffle(day_matches)
+                schedule[f"Journée {i}"] = [
+                    match if random.random() < 0.5 else (match[1], match[0])
+                    for match in day_matches
+                ]
+                available.difference_update(day_matches)
+
+            if complete:
+                self.schedule = schedule
+                return True
+
+        self.schedule = {}
+        print(
+            f"Échec : impossible de planifier {self.n_days} journées pour "
+            f"{self.n_teams} équipes sans rencontre en double.")
+        return False
 
     def save_csv(self, filename: str):
         with open(filename, mode="w", newline="", encoding="utf-8") as fp:
