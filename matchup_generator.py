@@ -92,6 +92,10 @@ class MatchupGenerator:
         Génère un planning de matchs en s'assurant qu'aucune rencontre n'est répétée.
         Chaque journée est tirée au sort indépendamment (pas de round-robin fixe),
         parmi les rencontres encore disponibles.
+
+        `max_attempts` limite le nombre de tirages complets relancés lorsqu'une
+        journée aboutit à une impasse : une valeur plus élevée augmente les
+        chances de succès au prix d'un temps de calcul plus long.
         """
         if self.n_days > self.n_teams - 1:
             print(
