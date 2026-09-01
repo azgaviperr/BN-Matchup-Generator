@@ -26,6 +26,22 @@ TOURPLAY_API_HEADERS = {
 }
 
 
+def prettify_roster_name(roster_name):
+    """Convert API roster identifiers like 'OldWorldAlliance_BB2025' to readable labels."""
+    if not isinstance(roster_name, str):
+        return "Non trouvé"
+
+    value = roster_name.strip()
+    if not value:
+        return "Non trouvé"
+
+    value = re.sub(r'_BB\d+$', '', value)
+    value = value.replace('_', ' ')
+    value = re.sub(r'([a-z])([A-Z])', r'\1 \2', value)
+    value = re.sub(r'\s+', ' ', value).strip()
+    return value or "Non trouvé"
+
+
 def resolve_local_source(source):
     """Resolve a local HTML source, including browser-saved *_files folders."""
     if os.path.isdir(source):
@@ -138,15 +154,33 @@ def fetch_tourplay_api_results(source, html_content):
     if not inscriptions:
         return None
 
+    def first_non_empty(mapping, keys, default='Non trouvé'):
+        """Return the first non-empty string value found in a mapping for the provided keys."""
+        for key in keys:
+            value = mapping.get(key)
+            if isinstance(value, str):
+                value = value.strip()
+            if value:
+                return value
+        return default
+
     results = []
     for inscription in inscriptions:
         player = inscription.get('player', {})
         roster = inscription.get('roster', {})
+        team_name = first_non_empty(
+            roster,
+            ['teamName', 'name', 'shortTeamName'],
+        )
+        roster_name = first_non_empty(
+            roster,
+            ['teamRace', 'rosterName'],
+        )
         results.append({
             'coach': player.get('userNameToShow', 'Non trouve'),
             'groupe': '',
-            'team': roster.get('shortTeamName') or 'Non trouvé',
-            'roster': roster.get('teamRace') or 'Non trouvé',
+            'team': team_name,
+            'roster': prettify_roster_name(roster_name),
         })
 
     return results
