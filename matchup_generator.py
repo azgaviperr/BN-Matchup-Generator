@@ -350,8 +350,40 @@ def main_ui():
     def open_presentation_window():
         pres_win = tk.Toplevel(root)
         pres_win.title("Présentation Journée")
-        pres_win.geometry("900x550")
-        pres_win.configure(bg="#2c3e50")
+        pres_win.geometry("1180x720")
+        pres_win.minsize(980, 620)
+        pres_win.configure(bg="#0f172a")
+
+        palette = {
+            "window": "#0f172a",
+            "panel": "#111c34",
+            "panel_alt": "#16233f",
+            "card": "#1a2747",
+            "card_active": "#173626",
+            "border": "#31456f",
+            "text": "#eff6ff",
+            "muted": "#9fb0cf",
+            "gold": "#fde047",
+            "accent": "#22c55e",
+            "success": "#34d399",
+            "danger": "#fb7185",
+        }
+
+        pres_style = ttk.Style(pres_win)
+        try:
+            pres_style.theme_use("clam")
+        except tk.TclError:
+            pass
+        pres_style.configure(
+            "Presentation.TButton",
+            padding=(14, 10),
+            font=("Segoe UI", 10, "bold")
+        )
+        pres_style.configure(
+            "Presentation.TCombobox",
+            padding=6,
+            arrowsize=16
+        )
 
         try:
             from glob import glob
@@ -406,52 +438,255 @@ def main_ui():
             return
 
         # Cadre principal de présentation
-        main_frame = tk.Frame(pres_win, bg="#2c3e50", padx=20, pady=20)
+        main_frame = tk.Frame(pres_win, bg=palette["window"], padx=24, pady=24)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
+        header_frame = tk.Frame(main_frame, bg=palette["panel"], highlightthickness=1,
+                                highlightbackground=palette["border"])
+        header_frame.pack(fill=tk.X, pady=(0, 18))
+
+        heading_block = tk.Frame(header_frame, bg=palette["panel"])
+        heading_block.pack(fill=tk.X, padx=22, pady=(18, 10))
+
+        heading_label = tk.Label(
+            heading_block,
+            text="Présentation des rencontres",
+            bg=palette["panel"],
+            fg=palette["text"],
+            font=("Segoe UI Semibold", 24)
+        )
+        heading_label.pack(anchor="w")
+
+        subtitle_label = tk.Label(
+            heading_block,
+            text="Affichage progressif des matchs de la journée sélectionnée",
+            bg=palette["panel"],
+            fg=palette["muted"],
+            font=("Segoe UI", 11)
+        )
+        subtitle_label.pack(anchor="w", pady=(4, 0))
+
+        stats_frame = tk.Frame(header_frame, bg=palette["panel"])
+        stats_frame.pack(fill=tk.X, padx=22, pady=(0, 18))
+
+        day_badge = tk.Label(
+            stats_frame,
+            text="Journée 0",
+            bg=palette["gold"],
+            fg="#1f2937",
+            padx=12,
+            pady=6,
+            font=("Segoe UI", 10, "bold")
+        )
+        day_badge.pack(side=tk.LEFT)
+
+        summary_label = tk.Label(
+            stats_frame,
+            text="0 rencontre",
+            bg=palette["panel_alt"],
+            fg=palette["text"],
+            padx=12,
+            pady=6,
+            font=("Segoe UI", 10, "bold")
+        )
+        summary_label.pack(side=tk.LEFT, padx=(10, 0))
+
+        status_label = tk.Label(
+            stats_frame,
+            text="Mode pause",
+            bg=palette["panel"],
+            fg=palette["muted"],
+            font=("Segoe UI", 10)
+        )
+        status_label.pack(side=tk.RIGHT)
+
         # Cadre de contrôle pour les boutons de navigation et le menu
-        control_frame = tk.Frame(main_frame, bg="#2c3e50")
+        control_frame = tk.Frame(main_frame, bg=palette["window"])
         control_frame.pack(fill=tk.X, pady=(0, 20))
 
         # Bouton "Précédent"
         btn_prev = ttk.Button(
-            control_frame, text="< Précédent", command=lambda: change_day(-1))
+            control_frame, text="< Précédent", style="Presentation.TButton",
+            command=lambda: change_day(-1))
         btn_prev.pack(side=tk.LEFT, padx=10)
 
         # Menu déroulant des journées
         journee_var = tk.StringVar(value=journees[0] if journees else "")
         journee_menu = ttk.Combobox(
-            control_frame, textvariable=journee_var, values=journees, state="readonly", width=25)
+            control_frame, textvariable=journee_var, values=journees,
+            state="readonly", width=25, style="Presentation.TCombobox")
         journee_menu.pack(side=tk.LEFT, expand=True, padx=10)
 
         # Bouton "Suivant"
         btn_next = ttk.Button(control_frame, text="Suivant >",
+                              style="Presentation.TButton",
                               command=lambda: change_day(1))
         btn_next.pack(side=tk.LEFT, padx=10)
 
         # Bouton pour passer à la prochaine rencontre
         btn_next_match = ttk.Button(
-            control_frame, text="Prochaine rencontre", command=lambda: show_next_match())
+            control_frame, text="Prochaine rencontre", style="Presentation.TButton",
+            command=lambda: show_next_match())
         btn_next_match.pack(side=tk.RIGHT, padx=10)
 
         # Bouton pour afficher tous les matchs de la journée
         btn_show_all = ttk.Button(
-            control_frame, text="Afficher la journée", command=lambda: show_all_matches())
+            control_frame, text="Afficher la journée", style="Presentation.TButton",
+            command=lambda: show_all_matches())
         btn_show_all.pack(side=tk.RIGHT, padx=10)
 
         # Bouton Pause/Lecture
         btn_pause = ttk.Button(control_frame, text="Lecture",
+                               style="Presentation.TButton",
                                command=lambda: toggle_play())
         btn_pause.pack(side=tk.RIGHT, padx=10)
 
         # Espace pour le titre de la journée
         title_label = tk.Label(
-            main_frame, text="", bg="#2c3e50", fg="#ecf0f1", font=("Helvetica", 24, "bold"))
-        title_label.pack(pady=10)
+            main_frame, text="", bg=palette["window"], fg=palette["text"], font=("Segoe UI Semibold", 22))
+        title_label.pack(anchor="w", pady=(0, 8))
 
         # Canvas d'affichage des matchs
-        canvas = tk.Canvas(main_frame, bg="#34495e", highlightthickness=0)
-        canvas.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        canvas_frame = tk.Frame(main_frame, bg=palette["window"])
+        canvas_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        canvas = tk.Canvas(canvas_frame, bg=palette["panel_alt"], highlightthickness=1,
+                   highlightbackground=palette["border"])
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        canvas_scrollbar = ttk.Scrollbar(canvas_frame, orient=tk.VERTICAL, command=canvas.yview)
+        canvas_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        canvas.configure(yscrollcommand=canvas_scrollbar.set)
+
+        def format_side_details(team_name, roster_name):
+            parts = []
+            if team_name and team_name != "Non trouvé":
+                parts.append(team_name)
+            if roster_name and roster_name != "Non trouvé":
+                parts.append(roster_name)
+            return " • ".join(parts) if parts else "Informations d'équipe indisponibles"
+
+        def update_navigation_state():
+            btn_prev.config(state=tk.NORMAL if current_day_index > 0 else tk.DISABLED)
+            btn_next.config(state=tk.NORMAL if current_day_index < len(journees) - 1 else tk.DISABLED)
+
+        def refresh_status():
+            journee = journee_var.get()
+            rencontres = journee_dict.get(journee, [])
+            shown_count = 0 if current_match_index < 0 else min(current_match_index + 1, len(rencontres))
+            day_badge.config(text=journee or "Journée")
+            summary_label.config(text=f"{len(rencontres)} rencontre{'s' if len(rencontres) > 1 else ''}")
+            state_text = "Lecture automatique" if playing else "Mode pause"
+            status_label.config(text=f"{state_text} • {shown_count}/{len(rencontres)} affichée{'s' if shown_count > 1 else ''}")
+            update_navigation_state()
+
+        def draw_empty_state(message):
+            canvas.delete("all")
+            width = max(canvas.winfo_width(), 600)
+            height = max(canvas.winfo_height(), 360)
+            card_w = min(620, width - 80)
+            card_h = 150
+            x1 = (width - card_w) / 2
+            y1 = (height - card_h) / 2
+            x2 = x1 + card_w
+            y2 = y1 + card_h
+            canvas.create_rectangle(x1, y1, x2, y2, fill=palette["card"], outline=palette["border"], width=2)
+            canvas.create_text((x1 + x2) / 2, y1 + 48, text="Aucune rencontre à afficher",
+                               fill=palette["text"], font=("Segoe UI Semibold", 22))
+            canvas.create_text((x1 + x2) / 2, y1 + 92, text=message,
+                               fill=palette["muted"], font=("Segoe UI", 12))
+            canvas.configure(scrollregion=(0, 0, width, height))
+
+        def draw_match_card(match_data, y_pos, coach_local_key, visiteur_coach_key,
+                            team_local_key, visiteur_team_key, roster_local_key,
+                            roster_visiteur_key, progress=1.0, highlight=False):
+            local_coach = match_data.get(coach_local_key, "N/A")
+            visiteur_coach = match_data.get(visiteur_coach_key, "N/A")
+            local_team = match_data.get(team_local_key, "")
+            visiteur_team = match_data.get(visiteur_team_key, "")
+            local_roster = match_data.get(roster_local_key, "")
+            visiteur_roster = match_data.get(roster_visiteur_key, "")
+
+            width = max(canvas.winfo_width(), 900)
+            card_margin = 36
+            card_width = width - (card_margin * 2)
+            card_height = 76
+            slide_offset = (1 - progress) * 140
+            x1 = card_margin
+            x2 = x1 + card_width
+            y1 = y_pos
+            y2 = y1 + card_height
+
+            fill = palette["card_active"] if highlight else palette["card"]
+            border = palette["accent"] if highlight else palette["border"]
+            badge_fill = palette["gold"] if highlight else palette["panel_alt"]
+            badge_text = "#1f2937" if highlight else palette["text"]
+
+            item_ids = []
+            item_ids.append(canvas.create_rectangle(x1, y1, x2, y2, fill=fill, outline=border, width=2))
+            item_ids.append(canvas.create_rectangle(x1 + 14, y1 + 14, x1 + 60, y1 + 36,
+                                    fill=badge_fill, outline=""))
+            item_ids.append(canvas.create_text(x1 + 37, y1 + 25, text="LOCAL", fill=badge_text,
+                               font=("Segoe UI", 9, "bold")))
+            item_ids.append(canvas.create_rectangle(x2 - 60, y1 + 14, x2 - 14, y1 + 36,
+                                    fill=badge_fill, outline=""))
+            item_ids.append(canvas.create_text(x2 - 37, y1 + 25, text="VISITEUR", fill=badge_text,
+                               font=("Segoe UI", 9, "bold")))
+
+            left_x = x1 + 82 - slide_offset
+            right_x = x2 - 82 + slide_offset
+            middle_x = (x1 + x2) / 2
+
+            item_ids.append(canvas.create_text(left_x, y1 + 31, text=local_coach, anchor="w",
+                               fill=palette["text"], font=("Segoe UI Semibold", 18)))
+            item_ids.append(canvas.create_text(left_x, y1 + 58,
+                               text=format_side_details(local_team, local_roster),
+                               anchor="w", fill=palette["muted"], font=("Segoe UI", 10)))
+
+            item_ids.append(canvas.create_text(right_x, y1 + 31, text=visiteur_coach, anchor="e",
+                               fill=palette["text"], font=("Segoe UI Semibold", 18)))
+            item_ids.append(canvas.create_text(right_x, y1 + 58,
+                               text=format_side_details(visiteur_team, visiteur_roster),
+                               anchor="e", fill=palette["muted"], font=("Segoe UI", 10)))
+
+            item_ids.append(canvas.create_oval(middle_x - 28, y1 + 16, middle_x + 28, y1 + 58,
+                               fill=palette["panel"], outline=border, width=2))
+            item_ids.append(canvas.create_text(middle_x, y1 + 37, text="VS", fill=palette["gold"],
+                               font=("Segoe UI", 16, "bold")))
+
+            return item_ids
+
+        def set_scroll_region(match_count, spacing, y_offset):
+            content_height = y_offset + max(match_count, 1) * spacing + 24
+            content_width = max(canvas.winfo_width(), 900)
+            canvas.configure(scrollregion=(0, 0, content_width, content_height))
+
+        def ensure_match_visible(match_index, spacing, y_offset):
+            if match_index < 0:
+                canvas.yview_moveto(0)
+                return
+
+            content_height = y_offset + max(len(journee_dict.get(journee_var.get(), [])), 1) * spacing + 24
+            viewport_height = max(canvas.winfo_height(), 1)
+            if content_height <= viewport_height:
+                return
+
+            card_top = y_offset + match_index * spacing
+            card_bottom = card_top + 76
+            top_fraction = canvas.yview()[0]
+            visible_top = top_fraction * content_height
+            visible_bottom = visible_top + viewport_height
+
+            if card_bottom > visible_bottom - 16:
+                new_top = min(card_bottom - viewport_height + 24, content_height - viewport_height)
+                canvas.yview_moveto(max(0, new_top / content_height))
+            elif card_top < visible_top + 16:
+                new_top = max(0, card_top - 24)
+                canvas.yview_moveto(new_top / content_height)
+
+        def on_canvas_mousewheel(event):
+            if canvas_scrollbar.winfo_ismapped():
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
         def toggle_play():
             nonlocal playing, after_id
@@ -466,6 +701,7 @@ def main_ui():
                 if after_id:
                     pres_win.after_cancel(after_id)
                     after_id = None
+                refresh_status()
 
         def show_all_matches():
             nonlocal current_match_index, playing
@@ -477,6 +713,7 @@ def main_ui():
             current_match_index = len(journee_dict[journee_var.get()]) - 1
             update_display()
             btn_next_match.config(state=tk.DISABLED)
+            canvas.yview_moveto(1.0)
 
         def change_day(direction):
             nonlocal current_day_index, current_match_index, playing
@@ -494,58 +731,28 @@ def main_ui():
             if item_ids is None:
                 item_ids = []
 
-            local_coach = match_data.get(coach_local_key, "N/A")
-            visiteur_coach = match_data.get(visiteur_coach_key, "N/A")
-            local_team = match_data.get(team_local_key, "")
-            visiteur_team = match_data.get(team_visiteur_key, "")
-            local_roster = match_data.get(roster_local_key, "")
-            visiteur_roster = match_data.get(roster_visiteur_key, "")
-
-            canvas_width = canvas.winfo_width()
-            x_left_final = canvas_width * 0.2
-            x_right_final = canvas_width * 0.8
-            x_vs = canvas_width * 0.5
-
-            y_main = y_pos
-            y_sub = y_pos + 25
-
-            # This is key for a smooth animation: clear the old drawings
             for item_id in item_ids:
                 canvas.delete(item_id)
             item_ids.clear()
 
-            if step < 20:  # Increase steps for a smoother effect
-                slide_dist = canvas_width / 2
-                x_left_start = -slide_dist
-                x_right_start = canvas_width + slide_dist
-
+            if step < 20:
                 progress = step / 20
-                x_left_current = x_left_start + \
-                    (x_left_final - x_left_start) * progress
-                x_right_current = x_right_start + \
-                    (x_right_final - x_right_start) * progress
-
-                item_ids.append(canvas.create_text(x_vs, y_main, text="VS",
-                                anchor="center", fill="#f1c40f", font=("Helvetica", 22, "bold")))
-                item_ids.append(canvas.create_text(x_left_current, y_main, text=local_coach,
-                                anchor="w", fill="#ecf0f1", font=("Helvetica", 20, "bold")))
-                item_ids.append(canvas.create_text(x_right_current, y_main, text=visiteur_coach,
-                                anchor="e", fill="#ecf0f1", font=("Helvetica", 20, "bold")))
-
+                new_item_ids = draw_match_card(
+                    match_data, y_pos, coach_local_key, visiteur_coach_key,
+                    team_local_key, visiteur_team_key, roster_local_key,
+                    roster_visiteur_key, progress=progress, highlight=True
+                )
+                item_ids.extend(new_item_ids)
                 pres_win.after(20, lambda: animate_match(
-                    match_data, y_pos, coach_local_key, visiteur_coach_key, team_local_key, visiteur_team_key, roster_local_key, roster_visiteur_key, step + 1, item_ids))
+                    match_data, y_pos, coach_local_key, visiteur_coach_key,
+                    team_local_key, visiteur_team_key, roster_local_key,
+                    roster_visiteur_key, step + 1, item_ids))
             else:
-                # Final position, display full details
-                canvas.create_text(x_left_final, y_main, text=local_coach,
-                                   anchor="w", fill="#ecf0f1", font=("Helvetica", 20, "bold"))
-                canvas.create_text(x_right_final, y_main, text=visiteur_coach,
-                                   anchor="e", fill="#ecf0f1", font=("Helvetica", 20, "bold"))
-                canvas.create_text(x_vs, y_main, text="VS", anchor="center",
-                                   fill="#f1c40f", font=("Helvetica", 22, "bold"))
-                canvas.create_text(
-                    x_left_final, y_sub, text=f"{local_team} ({local_roster})", anchor="w", fill="#bdc3c7", font=("Helvetica", 12))
-                canvas.create_text(
-                    x_right_final, y_sub, text=f"{visiteur_team} ({visiteur_roster})", anchor="e", fill="#bdc3c7", font=("Helvetica", 12))
+                draw_match_card(
+                    match_data, y_pos, coach_local_key, visiteur_coach_key,
+                    team_local_key, visiteur_team_key, roster_local_key,
+                    roster_visiteur_key, progress=1.0, highlight=True
+                )
                 item_ids.clear()
 
         def show_next_match():
@@ -574,6 +781,7 @@ def main_ui():
                 current_day_index = 0
 
             title_label.config(text=journee)
+            refresh_status()
 
             rencontres = journee_dict.get(journee, [])
             canvas.delete("all")
@@ -581,15 +789,15 @@ def main_ui():
             btn_next_match.config(state=tk.NORMAL)
 
             if not rencontres:
-                canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2,
-                                   text="Aucun match pour cette journée.", fill="#fff", font=("Helvetica", 16))
+                draw_empty_state("Aucun match pour cette journée.")
                 btn_next_match.config(state=tk.DISABLED)
                 return
 
-            y_offset = 30
-            spacing = 70
+            y_offset = 24
+            available_height = max(canvas.winfo_height() - 60, 420)
+            spacing = max(86, min(102, available_height // max(len(rencontres), 1)))
+            set_scroll_region(len(rencontres), spacing, y_offset)
 
-            # Fix for initial display and subsequent matches
             matches_to_show = rencontres[:current_match_index + 1]
 
             for i, r in enumerate(matches_to_show):
@@ -597,38 +805,27 @@ def main_ui():
                     animate_match(r, y_offset + i * spacing, coach_local_key, coach_visiteur_key,
                                   team_local_key, team_visiteur_key, roster_local_key, roster_visiteur_key)
                 else:
-                    local_coach = r.get(coach_local_key, "N/A")
-                    visiteur_coach = r.get(coach_visiteur_key, "N/A")
-                    local_team = r.get(team_local_key, "")
-                    visiteur_team = r.get(team_visiteur_key, "")
-                    local_roster = r.get(roster_local_key, "")
-                    visiteur_roster = r.get(roster_visiteur_key, "")
+                    draw_match_card(r, y_offset + i * spacing, coach_local_key,
+                                    coach_visiteur_key, team_local_key,
+                                    team_visiteur_key, roster_local_key,
+                                    roster_visiteur_key, progress=1.0,
+                                    highlight=False)
 
-                    canvas_width = canvas.winfo_width()
-                    x_left_final = canvas_width * 0.2
-                    x_right_final = canvas_width * 0.8
-                    x_vs = canvas_width * 0.5
+            if current_match_index < 0:
+                canvas.create_text(canvas.winfo_width() / 2, min(80, canvas.winfo_height() / 3),
+                                   text="Choisissez Lecture ou Prochaine rencontre pour démarrer",
+                                   fill=palette["muted"], font=("Segoe UI", 12))
+                canvas.yview_moveto(0)
+            else:
+                ensure_match_visible(current_match_index, spacing, y_offset)
 
-                    y_main = y_offset + i * spacing
-                    y_sub = y_main + 25
-
-                    canvas.create_text(x_left_final, y_main, text=local_coach,
-                                       anchor="w", fill="#ecf0f1", font=("Helvetica", 20, "bold"))
-                    canvas.create_text(x_right_final, y_main, text=visiteur_coach,
-                                       anchor="e", fill="#ecf0f1", font=("Helvetica", 20, "bold"))
-                    canvas.create_text(x_vs, y_main, text="VS", anchor="center", fill="#f1c40f", font=(
-                        "Helvetica", 22, "bold"))
-
-                    canvas.create_text(
-                        x_left_final, y_sub, text=f"{local_team} ({local_roster})", anchor="w", fill="#bdc3c7", font=("Helvetica", 12))
-                    canvas.create_text(
-                        x_right_final, y_sub, text=f"{visiteur_team} ({visiteur_roster})", anchor="e", fill="#bdc3c7", font=("Helvetica", 12))
-
-            # New and corrected animation loop logic
             if playing and current_match_index < len(rencontres) - 1:
                 after_id = pres_win.after(3000, show_next_match)
 
         journee_menu.bind('<<ComboboxSelected>>', update_display)
+        canvas.bind("<Configure>", update_display)
+        canvas.bind_all("<MouseWheel>", on_canvas_mousewheel)
+        refresh_status()
         update_display()
 
     # --- Variables de l'interface ---

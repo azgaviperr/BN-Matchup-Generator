@@ -78,3 +78,6 @@ cython_debug/
 # Generated files
 *generated*
 demo/
+tourplay_data_exported/
+coachs_extract.csv
+Ligue Blood Bowl*
