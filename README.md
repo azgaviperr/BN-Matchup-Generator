@@ -61,6 +61,64 @@ Le script produit :
 - `tourplay_data_exported/coachs_extract.csv`
 - `tourplay_data_exported/coachs_extract.json`
 
+### 2bis. Generer les posts Discourse par journee
+
+Une fois le calendrier genere (fichier `matchups_enriched.csv`), vous pouvez
+produire un post Markdown par journee au format Discourse :
+
+```bash
+python generate_discourse_posts.py
+```
+
+Le script :
+
+- detecte les dossiers `generated_*` et demande lequel utiliser s'il y en a plusieurs
+- demande la saison (ex: `18`) pour generer le tag `saison18` et le titre `[S18]`
+- demande la `Periode` de chaque journee (ex: `13/04 au 03/05`)
+- applique par defaut les tags : `saisonXX`, `matchup_generator`, `journee`, `calendrier`, `matchs`
+- ecrit les fichiers dans `generated_xxx/discourse_posts/`
+- publie ensuite les topics via l'API Discourse (par defaut)
+
+Configuration API possible via variables d'environnement :
+
+- `DISCOURSE_URL`
+- `DISCOURSE_API_KEY`
+- `DISCOURSE_API_USERNAME`
+- `DISCOURSE_CATEGORY_ID` (optionnel)
+
+Exemple non interactif pour une seule journee :
+
+```bash
+python generate_discourse_posts.py --period "Journee 11=13/04 au 03/05" --no-prompt-periods
+```
+
+Exemple non interactif avec saison :
+
+```bash
+python generate_discourse_posts.py --season 18 --period "Journee 11=13/04 au 03/05" --no-prompt-periods
+```
+
+Selection explicite d'un dossier de generation :
+
+```bash
+python generate_discourse_posts.py --season 18 --generated-dir "generated_20260903_204948"
+```
+
+Si vous voulez uniquement generer les fichiers markdown sans publier :
+
+```bash
+python generate_discourse_posts.py --season 18 --no-post
+```
+
+Exemple publication directe via API Discourse :
+
+```bash
+python generate_discourse_posts.py \
+	--discourse-url "https://forum.ligue-bn.com" \
+	--api-key "VOTRE_API_KEY" \
+	--api-username "system"
+```
+
 ### 3. Générer les journées
 
 Lancez l'interface principale :
